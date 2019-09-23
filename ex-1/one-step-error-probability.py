@@ -1,6 +1,6 @@
 import numpy as np
-
-def calculate_instance( n, p):
+import time
+def calculate_instance( n, p, zero_diagonal):
     #Create p random patterns
     patterns = []
     
@@ -13,14 +13,16 @@ def calculate_instance( n, p):
     weights = np.true_divide(weights, n)
     
     #Fill diagonal with zeroes
-    np.fill_diagonal(weights,0)
+    if zero_diagonal:
+        np.fill_diagonal(weights,0)
     #Feed random pattern as input and test if an error occurs
-    S1 = patterns[0].copy().T
+    S1 = patterns[0]
     chosen_i = np.random.choice(range(n))
+    S_i_old = S1[chosen_i]
+
     S_i = esign(np.dot(weights[chosen_i], S1))
-    S1[chosen_i] = S_i
     #breakpoint()
-    return np.array_equal(S1,patterns[0].T)
+    return S_i_old == S_i
 
 def esign(x):
 
@@ -29,16 +31,32 @@ def esign(x):
     else:
         return np.sign(x)
 
+#Exercise 1A
 p = [12, 24, 48, 70, 100, 120]
 N = 120
-solve = [0,0]
 I = 100000
 for p_i in p:
+    solve = [0,0]
     for i in range(I):
-        ret = calculate_instance(N, p_i)
+        ret = calculate_instance(N, p_i, True)
         if ret:
             solve[0]+=1
         else:
             solve[1]+=1
     p_error = float(solve[1]/I) 
-    print(f"Number of patterns: {p}, P_error(t=1): {p_error} ")
+    print(f"Number of patterns: {p_i}, P_error(t=1): {p_error} ")
+
+#Exercise 1B
+p = [12, 24, 48, 70, 100, 120]
+N = 120
+I = 100000
+for p_i in p:
+    solve = [0,0]
+    for i in range(I):
+        ret = calculate_instance(N, p_i, False)
+        if ret:
+            solve[0]+=1
+        else:
+            solve[1]+=1
+    p_error = float(solve[1]/I) 
+    print(f"Number of patterns: {p_i}, P_error(t=1): {p_error} ")
