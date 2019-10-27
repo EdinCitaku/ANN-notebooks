@@ -1,0 +1,38 @@
+\documentclass[12pt,A4]{article}
+\usepackage[dvipsnames,rgb,dvips]{xcolor}
+\usepackage{graphicx}
+\usepackage{psfrag}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[rflt]{floatflt}
+\usepackage{latexsym}
+\addtolength{\topmargin}{-1.9cm}
+\addtolength{\textheight}{5.5cm}
+\addtolength{\evensidemargin}{-1.2cm}
+\addtolength{\oddsidemargin}{-1.2cm}
+\addtolength{\textwidth}{2cm}
+\pagestyle{myheadings}
+\markright{{\small Edin Citaku \hfill (XXYYZZ-ABCD) \,}}
+\begin{document}
+\parindent=0cm
+
+\begin{figure}
+
+\begin{center}
+\begin{tabular}{|| c c c c c||}
+\hline
+Network number & $C_{training}$ &$C_{valid}$ & $C_{test}$& Epochs before end\\[0.5ex]
+\hline \hline
+1 & 0.3365 & 0.3980 & 0.3925 & 120\\
+\hline
+2 & 0.2698 & 0.3069 & 0.3043 & 120\\ [1ex]
+\hline
+
+\end{tabular}
+\end{center}
+\caption{Classification error and number of epochs for each network\label{tab}}
+\end{figure}
+You can see in table \ref{tab} that the addition of complexity from network 2 compared to network 1 resulted in a significant increase of classification performance. This did not have any effect on overfitting, since both networks learned for the whole 120 epochs.
+\end{document}

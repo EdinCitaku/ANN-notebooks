@@ -1,0 +1,42 @@
+\documentclass[12pt,A4]{article}
+\usepackage[dvipsnames,rgb,dvips]{xcolor}
+\usepackage{graphicx}
+\usepackage{psfrag}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[rflt]{floatflt}
+\usepackage{latexsym}
+\addtolength{\topmargin}{-1.9cm}
+\addtolength{\textheight}{5.5cm}
+\addtolength{\evensidemargin}{-1.2cm}
+\addtolength{\oddsidemargin}{-1.2cm}
+\addtolength{\textwidth}{2cm}
+\pagestyle{myheadings}
+\markright{{\small Edin Citaku \hfill (XXYYZZ-ABCD) \,}}
+\begin{document}
+\parindent=0cm
+
+\begin{figure}
+
+\begin{center}
+\begin{tabular}{|| c c c ||}
+\hline
+Network number & Classification error & Epochs before end\\[0.5ex]
+\hline \hline
+1 & 0.5128 & 210\\
+\hline
+2 & 0.5237 & 158\\
+\hline
+3 & 0.4924 & 375\\ [1ex]
+\hline
+
+\end{tabular}
+\end{center}
+\caption{Classification error and number of epochs for each network\label{tab}}
+\end{figure}
+As you can see in table \ref{tab} network 1 and network 2 show a similar classification error, while network 2 was finished 50 episodes earlier. This is because adding an additional hidden layer significantly increases the probability of overfitting.
+Overfitting can be migitated by tweeking the regularization, for example L2. As you can see in network 3, simply tweaking L2 regularization increased the number of epochs highly, showing that overfitting happened significantly later. The network was able to learn longer and deliver a better classification error, without a change of the networks layout.
+
+\end{document}

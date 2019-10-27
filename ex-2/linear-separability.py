@@ -4,6 +4,7 @@ import csv
 
 def calculate_output(threshold, weight_matrix, x, my):
     inner_sum = 0
+    print(weight_matrix)
     for i in range(len(x[0])):
         inner_sum+= weight_matrix[i]*x[my][i]
     return np.tanh(0.5*(inner_sum-threshold))

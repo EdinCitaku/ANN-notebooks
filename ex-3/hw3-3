@@ -2,8 +2,6 @@ import numpy as np
 from numpy import random as rnd
 import csv
 import matplotlib.pyplot as plt
-from collections import defaultdict
-#from keras.datasets import cifar10 # Data from keras package
 
 def unpickle(file):
     "Returns an a dictionary of a single batch, if filename is correct"
@@ -182,15 +180,14 @@ def learn(learning_rate:float, data: list, labels: list,test_data : list, test_l
 
     w,V,O = create_multible_layers(*argv)
     #merged = np.concatenate([data, labels], axis=1)
-    ret = defaultdict(list)
-    #TODO create a dictionary
     return_w = []
     return_c = []
     return_O = []
-    return_H = []
-    return_u = []
-    for T in range(100):
+    for T in range(20):
         #Permutate the data in the beginning of each epoch
+        #TODO make sure that this works as intended
+        #np.random.shuffle(merged)
+        #data, labels = np.split(merged, [data.shape[1]], axis=1)
         data,labels = shuffle(data,labels)
         for i in range(0, len(data), batchsize):
         # Add test after each epoch (also easy)
@@ -206,59 +203,14 @@ def learn(learning_rate:float, data: list, labels: list,test_data : list, test_l
             propagate_forward(V,O,w, bs)
             propagate_backwards(V,O,w,t,learning_rate, bs)
         #print(w[0])
-        #C = calculate_classification_error(V,w,O,test_data, test_labels)
+        C = calculate_classification_error(V,w,O,test_data, test_labels)
         #print(w[0])
-        newH, new_u = calculate_H_and_U(V,w,O,data, labels)
-        return_H.append(newH)
-        return_u.append(new_u)
-        #return_c.append(C)
+        return_c.append(C)
         return_w.append(w)
         return_O.append(O)
     print("Finished learning!")
-    ret["H"] = return_H
-    ret["u"] = return_u
-    ret["w"] = return_w
-    ret["O"] = return_O
-    ret["C"] = return_c
-    return ret
-
-def calculate_H_and_U(V,w,O,training_set, label_set):
-    H = 0
-    #initialize u(l)
-    u = []
-    for O_l in O:
-        u.append(np.zeros(O_l.shape))
-    batchsize = 100
-    for i in range(0,len(training_set),batchsize):
-        my = i
-        bs = batchsize
-        if my + batchsize >= len(data):
-            bs =  len(training_set) - my
-        V[0] = training_set[my:my+bs].T
-        t = label_set[my:my+bs].T
-        propagate_forward(V,O,w,bs)
-        #TODO add to U(l) and H
-        #Update H
-        y_i = np.argmax(V[-1],axis=0)
-        y_i = y_i.tolist()
-        transformlabels(y_i,10)
-        y_i = np.array(y_i).T
-        #y = np.zeros((len(V[-1]),bs))
-        #print(y_i)
-        #y[:,y_i] = 1
-        y_i = y_i.reshape(10,bs)
-        temp = y_i - t 
-        H += np.sum(np.abs(y_i-t))
-        #update u
-        d = calculate_all_d(V,O,w,t)
-        for l in range(len(u)):
-            u[l] += (d[l]@np.ones((batchsize,1)))
-    for l in range(len(u)):
-        u[l] = np.linalg.norm(u[l])
-    return H/2, u
-
-         
-
+    return return_c, return_w, V, return_O
+        
 
 def calculate_classification_error(V,w,O, test_data, test_labels):
     inner_sum = 0
@@ -297,19 +249,18 @@ data = batch_1[b'data']
 data = np.append(data,batch_2[b'data'], axis=0)
 data = np.append(data,batch_3[b'data'], axis=0)
 data = np.append(data,batch_4[b'data'], axis=0)
-data = np.append(data,batch_5[b'data'], axis=0)
+#data = np.append(data,batch_5[b'data'], axis=0)
 labels = batch_1[b'labels']
 #Since labels are only a normal array
 labels += batch_2[b'labels']
 labels += batch_3[b'labels']
 labels += batch_4[b'labels']
-labels += batch_5[b'labels']
+#labels += batch_5[b'labels']
 data = center_data(data)
 transformlabels(labels,10)
 labels = np.array(labels)
 labels = labels.astype(np.uint8)
-labels = np.array(labels).reshape(50000,10)
-
+labels = np.array(labels).reshape(40000,10)
 test_batch = unpickle(folder_name+"test_batch")
 test_data = batch_5[b'data']
 test_labels = batch_5[b'labels']
@@ -319,32 +270,6 @@ test_labels = np.array(test_labels)
 
 test_labels = test_labels.astype(np.uint8)
 
-"""
-(X_train, y_train), (X_test, y_test) = cifar10.load_data()
-
-# Samples in trainset
-samples_train = X_train.shape[0]
-
-# Samples in testset
-samples_test = X_test.shape[0]
-
-# Input units (3072)
-input_units = X_train.shape[1]*X_train.shape[2]*X_train.shape[3]
-
-X_train = X_train.reshape(-1, input_units)
-
-#transformlabels(y_train,10)
-X_train_cent = center_data(X_train)
-
-
-def one_hot_enc(y):
-    z = 10
-    return np.eye(z)[y].reshape((len(y), z))
-
-y_train = one_hot_enc(y_test)
-"""
-learning_rate = 0.01
-batchsize = 100
 #IT DOES NOT WORK
 #POSSIBLE PROBLEMS:
 # Permutation is not correct
@@ -352,4 +277,52 @@ batchsize = 100
 # Centering Function is fucked up
 # Batch processing is fucked up
 # -> Test with Aufgabe 2.1 and see if it works
-ret_dic = learn(learning_rate, data,labels,[],[],batchsize,3072, 20,20,20,20,10)
+
+
+minibatch_size = 100
+learning_rate = 0.1
+
+#Network 1
+c1,w1, V1,O1 = learn(learning_rate,data,labels,test_data, test_labels, minibatch_size, 3072,10)
+plt.plot(c1, color="blue",label="Network 1")
+#Network 2
+c2,w2,V2,O2 = learn(learning_rate,data,labels,test_data, test_labels, minibatch_size, 3072,10,10)
+plt.plot(c2, color = "red", label = "Network 2")
+#Network 3
+c3,w3,V3,O3 = learn(learning_rate,data,labels,test_data, test_labels, minibatch_size, 3072,50,10)
+plt.plot(c3, color = "brown", label = "Network 3")
+
+
+#Network 4
+c4,w4,V4,O4 = learn(learning_rate,data,labels,test_data, test_labels, minibatch_size, 3072,50,50,10)
+plt.plot(c4, color = "green", label = "Network 4")
+plt.yscale("log")
+plt.plot(c1, color="blue",label="Network 1")
+plt.plot(c2, color = "red", label = "Network 2")
+plt.plot(c3, color = "brown", label = "Network 3")
+plt.plot(c4, color = "green", label = "Network 4")
+plt.legend()
+plt.show()
+#lets make a table!
+def calculate_table_entries(C,w,V,O, showcase_data, showcase_labels):
+    max_i = np.argmin(C,axis=0)
+    classif_error_test = calculate_classification_error(V,w[max_i],O[max_i],showcase_data, showcase_labels)
+    classif_error_train = calculate_classification_error(V,w[max_i],O[max_i],data, labels)
+    return [max_i, C[max_i], classif_error_test,classif_error_train]
+    
+    
+batch_showcase = batch_1 = unpickle(folder_name+"test_batch")
+showcase_data = batch_showcase[b'data']
+showcase_labels = batch_showcase[b'labels']
+showcase_data = center_data(showcase_data)
+transformlabels(showcase_labels,10)
+
+#Lets get the classification_error for Network 1
+from tabulate import tabulate
+column1 = [1] + calculate_table_entries(c1,w1,V1,O1,showcase_data, showcase_labels)
+column2 = [2] + calculate_table_entries(c2,w2,V2,O2,showcase_data, showcase_labels)
+column3 = [3] + calculate_table_entries(c3,w3,V3,O3,showcase_data, showcase_labels)
+column4 = [4] + calculate_table_entries(c4,w4,V4,O4,showcase_data, showcase_labels)
+columnlabels = ["Network","best epoch", "C validation set", "C test set", "C training set"]
+rowlabels = ["network 1", "network 2", "network 3", "network 4"]
+print(tabulate([column1, column2, column3,column4], headers=columnlabels))
